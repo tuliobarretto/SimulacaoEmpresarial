@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulador Empresarial – Eventos Aleatórios</title>
+
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="estilo.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<h1>Simulador Empresarial — Mercado Dinâmico</h1>
+
+<div class="container">
+
+    <div class="box">
+        <h2>Capital Inicial</h2>
+        <input id="capitalInicial" type="number" value="50000">
+        <button onclick="iniciar()">Iniciar Nova Simulação</button>
+    </div>
+
+    <div class="box" id="inputsMes" style="display:none;">
+        <h2 id="tituloMes">Mês 3</h2>
+
+        <label>Produção</label><input id="prod">
+        <label>Marketing</label><input id="mkt">
+        <label>P&D</label><input id="pd">
+        <label>Pessoal</label><input id="pes">
+
+        <button onclick="rodarMes()">Confirmar Investimentos</button>
+    </div>
+
+    <div class="box grafico-box">
+        <h2>Evolução</h2>
+        <canvas id="grafico"></canvas>
+        <button onclick="exportarPDF()">Exportar PDF</button>
+    </div>
+
+</div>
+
+<div class="cards">
+    <div class="card" id="cardCapital">Capital Atual: —</div>
+    <div class="card" id="cardEvento">Evento: —</div>
+    <div class="card" id="cardStatus">Status: —</div>
+</div>
+
+<div id="tabelaContainer"></div>
+
+<!-- JavaScript externo -->
+<script src="script.js"></script>
+
+</body>
+</html>
