@@ -1,0 +1,179 @@
+let mesAtual = 3;
+let capital = 0;
+let historico = [];
+let grafico;
+
+// EVENTOS DETALHADOS COM NARRATIVA E IMPACTO
+const eventos = [
+    {
+        nome: "Concorrente Baixa os Preços",
+        mult: { prod: 0.15, mkt: 0.20, pd: 0.15, pes: -0.10 },
+        historia:
+`Uma empresa rival lança uma promoção agressiva.
+O mercado inteiro entra em disputa.
+Seu setor de produção sofre forte pressão e sua margem encolhe.
+
+Mudanças:
+• **Produção rende menos (15%) devido à queda de preço**
+• **Marketing mantém força (20%)**
+• **P&D permanece estável (15%)**
+• **Pessoal continua reduzindo lucro (-10%)**`
+    },
+    {
+        nome: "Boom de Consumo",
+        mult: { prod: 0.40, mkt: 0.30, pd: 0.20, pes: -0.10 },
+        historia:
+`O país vive um momento de otimismo econômico.
+As famílias estão consumindo como nunca, e as empresas surfam o boom.
+
+Mudanças:
+• **Produção explode para 40% de retorno**
+• **Marketing aumenta para 30%**
+• **P&D sobe para 20%**
+• **Custos com pessoal continuam (-10%)**`
+    },
+    {
+        nome: "Crise de Reputação Viral",
+        mult: { prod: 0.20, mkt: 0.40, pd: 0.20, pes: -0.15 },
+        historia:
+`Um vídeo polêmico circula nas redes e afeta a imagem do setor.
+As empresas precisam correr para conter danos.
+
+Mudanças:
+• **Marketing vira prioridade absoluta (40%)**
+• **Produção cai para 20%**
+• **P&D sobe para 20%**
+• **Pessoal pesa mais (-15%) por treinamentos e correções**`
+    },
+    {
+        nome: "Ataque Hacker",
+        mult: { prod: 0.25, mkt: 0.20, pd: 0.35, pes: -0.10 },
+        historia:
+`Um ataque digital atinge o setor.
+Segurança vira pauta urgente e investimentos tecnológicos sobem.
+
+Mudanças:
+• **P&D dispara para 35%**
+• **Produção fica moderada (25%)**
+• **Marketing mantém 20%**
+• **Pessoal continua custando (-10%)**`
+    },
+    {
+        nome: "Imposto Emergencial",
+        mult: { prod: 0.25, mkt: 0.20, pd: 0.15, pes: -0.10 },
+        taxaExtra: 0.90,
+        historia:
+`O governo anuncia um imposto emergencial de crise.
+Todas as empresas pagam uma taxa sobre o lucro.
+
+Mudanças:
+• **Todos os retornos permanecem iguais**
+• **Redução de 10% no lucro final (taxaExtra 0.90)**`
+    }
+];
+
+// ============================
+// INÍCIO DA SIMULAÇÃO
+// ============================
+
+function iniciar() {
+    capital = Number(document.getElementById("capitalInicial").value);
+    historico = [capital];
+    mesAtual = 3;
+
+    document.getElementById("inputsMes").style.display = "block";
+    atualizarCards("—");
+    gerarTabela();
+}
+
+function rodarMes() {
+    let prod = Number(document.getElementById("prod").value);
+    let mkt  = Number(document.getElementById("mkt").value);
+    let pd   = Number(document.getElementById("pd").value);
+    let pes  = Number(document.getElementById("pes").value);
+
+    if (prod + mkt + pd + pes > capital) {
+        alert("Investimento maior que o capital.");
+        return;
+    }
+
+    // Sorteio de evento
+    let evento = eventos[Math.floor(Math.random() * eventos.length)];
+    let f = evento.mult;
+
+    let lucro = prod*f.prod + mkt*f.mkt + pd*f.pd + pes*f.pes;
+    if (evento.taxaExtra) lucro *= evento.taxaExtra;
+
+    capital = lucro;
+    historico.push(capital);
+
+    // Exibe o evento detalhado
+    document.getElementById("cardEvento").innerHTML =
+        `<b>${evento.nome}</b><br><div class='evento-texto'>${evento.historia.replace(/\*\*(.*?)\*\*/g,"<b>$1</b>")}</div>`;
+
+    atualizarCards(evento.nome);
+    gerarTabela();
+    atualizarGrafico();
+
+    mesAtual++;
+    document.getElementById("tituloMes").innerText = "Mês " + mesAtual;
+
+    if (capital <= 0 || mesAtual > 8) {
+        document.getElementById("cardStatus").innerHTML =
+            capital <= 0
+            ? "<b style='color:red'>FALÊNCIA</b>"
+            : "<b style='color:green'>SIMULAÇÃO CONCLUÍDA</b>";
+
+        document.getElementById("inputsMes").style.display = "none";
+    }
+}
+
+function gerarTabela() {
+    let html = `
+    <table>
+        <tr><th>Mês</th><th>Capital</th></tr>
+    `;
+
+    historico.forEach((c,i)=>{
+        html += `<tr><td>${i+3}</td><td>R$ ${c.toFixed(2)}</td></tr>`;
+    });
+
+    html += `</table>`;
+    document.getElementById("tabelaContainer").innerHTML = html;
+}
+
+function atualizarCards(evento) {
+    document.getElementById("cardCapital").innerHTML =
+        "Capital Atual:<br>R$ " + capital.toFixed(2);
+}
+
+function atualizarGrafico() {
+    if (grafico) grafico.destroy();
+    grafico = new Chart(document.getElementById("grafico"),{
+        type:"line",
+        data:{
+            labels: historico.map((_,i)=>"Mês "+(i+3)),
+            datasets:[{
+                label:"Capital ao longo do tempo",
+                data: historico,
+                borderColor:"#1e6ee3",
+                borderWidth:3,
+                tension:0.4
+            }]
+        }
+    });
+}
+
+function exportarPDF() {
+    const { jsPDF } = window.jspdf;
+    let pdf = new jsPDF();
+
+    pdf.text("Relatório Empresarial", 10, 10);
+    pdf.text("Capital final: R$ " + capital.toFixed(2), 10, 20);
+
+    historico.forEach((c,i)=>{
+        pdf.text(`Mês ${i+3}: R$ ` + c.toFixed(2), 10, 30 + i*10);
+    });
+
+    pdf.save("simulacao_empresa.pdf");
+}
